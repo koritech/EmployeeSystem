@@ -11,7 +11,8 @@ namespace EmployeeSystem.Tests.API
     [TestFixture]
     public class EmployeeControllerTests
     {
-        private Mock<IEmployeeService> _serviceMock = null!;
+        private Mock<IEmployeeService> _commandServiceMock = null!;
+        private Mock<IEmployeeQueryService> _queryServiceMock = null!;
         private Mock<ILogger<EmployeeController>> _loggerMock = null!;
         private Mock<IRequestValidator> _validatorMock = null!;
         private EmployeeController _controller = null!;
@@ -19,12 +20,14 @@ namespace EmployeeSystem.Tests.API
         [SetUp]
         public void Setup()
         {
-            _serviceMock = new Mock<IEmployeeService>();
+            _commandServiceMock = new Mock<IEmployeeService>();
+            _queryServiceMock = new Mock<IEmployeeQueryService>();
             _loggerMock = new Mock<ILogger<EmployeeController>>();
             _validatorMock = new Mock<IRequestValidator>();
 
             _controller = new EmployeeController(
-                _serviceMock.Object,
+                _commandServiceMock.Object,
+                _queryServiceMock.Object,
                 _loggerMock.Object,
                 _validatorMock.Object);
         }
@@ -36,7 +39,7 @@ namespace EmployeeSystem.Tests.API
             _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "pageSize")).Returns(new ValidationResult());
 
             var employees = new List<EmployeeDto> { new() { EmployeeNumber = 1, Name = "Vivek" } };
-            _serviceMock.Setup(s => s.GetAllAsync(null, 1, 50)).ReturnsAsync(employees);
+            _queryServiceMock.Setup(s => s.GetAllAsync(null, 1, 50)).ReturnsAsync(employees);
 
             var result = await _controller.GetAll(null);
 
@@ -67,7 +70,7 @@ namespace EmployeeSystem.Tests.API
         {
             _validatorMock.Setup(v => v.ValidateNumber(1, "employeeNumber")).Returns(new ValidationResult());
             var dto = new EmployeeDto { EmployeeNumber = 1, Name = "John" };
-            _serviceMock.Setup(s => s.GetByNumberAsync(1)).ReturnsAsync(dto);
+            _queryServiceMock.Setup(s => s.GetByNumberAsync(1)).ReturnsAsync(dto);
 
             var result = await _controller.Get(1);
 

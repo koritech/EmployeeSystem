@@ -23,18 +23,6 @@ namespace EmployeeSystem.Services
             await _repo.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<EmployeeDto>> GetAllAsync(string? nameFilter, int page, int pageSize)
-        {
-            var list = await _repo.GetAllAsync(nameFilter, page, pageSize);
-            return list.Select(_mapper.ToDto);
-        }
-
-        public async Task<EmployeeDto?> GetByNumberAsync(int employeeNumber)
-        {
-            var entity = await _repo.GetByIdAsync(employeeNumber);
-            return entity is null ? null : _mapper.ToDto(entity);
-        }
-
         public async Task UpdateAsync(EmployeeDto dto)
         {
             var employee = await _repo.GetByIdAsync(dto.EmployeeNumber);
@@ -42,15 +30,6 @@ namespace EmployeeSystem.Services
 
             _mapper.UpdateEntity(employee, dto);
             await _repo.UpdateAsync(employee);
-            await _repo.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int employeeNumber)
-        {
-            var employee = await _repo.GetByIdAsync(employeeNumber);
-            if (employee is null) return;
-
-            await _repo.DeleteAsync(employee);
             await _repo.SaveChangesAsync();
         }
     }

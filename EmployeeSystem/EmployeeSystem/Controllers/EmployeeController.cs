@@ -9,15 +9,18 @@ using Microsoft.Extensions.Logging;
 public class EmployeeController : ControllerBase
 {
     private readonly IEmployeeService _employeeService;
+    private readonly IEmployeeQueryService _employeeQueryService;
     private readonly ILogger<EmployeeController> _logger;
     private readonly IRequestValidator _requestValidator;
 
     public EmployeeController(
         IEmployeeService employeeService,
+        IEmployeeQueryService employeeQueryService,
         ILogger<EmployeeController> logger,
         IRequestValidator requestValidator)
     {
         _employeeService = employeeService;
+        _employeeQueryService = employeeQueryService;
         _logger = logger;
         _requestValidator = requestValidator;
     }
@@ -32,7 +35,7 @@ public class EmployeeController : ControllerBase
             return BadRequest(new { Errors = pageValidation.Errors.Concat(sizeValidation.Errors) });
         }
 
-        var result = await _employeeService.GetAllAsync(name, page, pageSize);
+        var result = await _employeeQueryService.GetAllAsync(name, page, pageSize);
         return Ok(result);
     }
 
@@ -45,7 +48,7 @@ public class EmployeeController : ControllerBase
             return BadRequest(new { Errors = validation.Errors });
         }
 
-        var result = await _employeeService.GetByNumberAsync(employeeNumber);
+        var result = await _employeeQueryService.GetByNumberAsync(employeeNumber);
         return result is null ? NotFound() : Ok(result);
     }
 
@@ -87,7 +90,7 @@ public class EmployeeController : ControllerBase
             return BadRequest(new { Errors = validation.Errors });
         }
 
-        await _employeeService.DeleteAsync(employeeNumber);
+        await _employeeQueryService.DeleteAsync(employeeNumber);
         return NoContent();
     }
 }
