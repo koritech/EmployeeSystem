@@ -15,19 +15,19 @@ namespace EmployeeSystem.Services.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<EmployeeDto>> GetAllAsync(string? nameFilter, int page, int pageSize)
+        public async Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync(string? nameFilter, int page, int pageSize)
         {
             var list = await _repo.GetAllAsync(nameFilter, page, pageSize);
             return list.Select(_mapper.ToDto);
         }
 
-        public async Task<EmployeeDto?> GetByNumberAsync(int employeeNumber)
+        public async Task<EmployeeDto?> GetByEmployeeNumberAsync(int employeeNumber)
         {
             var entity = await _repo.GetByIdAsync(employeeNumber);
             return entity is null ? null : _mapper.ToDto(entity);
         }
 
-        public async Task DeleteAsync(int employeeNumber)
+        public async Task DeleteEmployeeAsync(int employeeNumber)
         {
             var employee = await _repo.GetByIdAsync(employeeNumber);
             if (employee is null) return;

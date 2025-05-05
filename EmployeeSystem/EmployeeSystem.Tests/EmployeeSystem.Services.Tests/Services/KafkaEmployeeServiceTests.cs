@@ -1,24 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EmployeeSystem.Services;
 using EmployeeSystem.Services.DTOs;
-using EmployeeSystem.Services;
+using EmployeeSystem.Services.Interfaces;
 using Moq;
 using Newtonsoft.Json;
+using NUnit.Framework;
 
-namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.Services
+namespace EmployeeSystem.Tests.Services
 {
     [TestFixture]
     public class KafkaEmployeeServiceTests
     {
+        private const string Topic = "employee-updates-test";
+
         private Mock<IKafkaProducer> _producerMock = null!;
         private KafkaEmployeeService _service = null!;
-        private const string Topic = "employee-operations";
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
             _producerMock = new Mock<IKafkaProducer>();
             _service = new KafkaEmployeeService(_producerMock.Object);

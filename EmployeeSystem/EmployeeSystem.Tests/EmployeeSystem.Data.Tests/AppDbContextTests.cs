@@ -1,4 +1,5 @@
 ﻿using EmployeeSystem.Data;
+using EmployeeSystem.Data.Models;
 using EmployeeSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,8 +40,11 @@ namespace EmployeeSystem.Tests.Data
             {
                 EmployeeNumber = 101,
                 Name = "Vivek Ramachandran",
-                HourlyRate = 50,
-                HoursWorked = 40
+                WorkRecord = new EmployeeWorkRecord
+                {
+                    HourlyRate = 50,
+                    HoursWorked = 40
+                }
             };
 
             await _context.Employees.AddAsync(employee);
@@ -55,18 +59,19 @@ namespace EmployeeSystem.Tests.Data
         [Test]
         public async Task PrimaryKey_EmployeeNumber_ShouldPreventDuplicates()
         {
-            var emp1 = new Employee { EmployeeNumber = 1, Name = "Test", HourlyRate = 20, HoursWorked = 10 };
-            var emp2 = new Employee { EmployeeNumber = 1, Name = "Duplicate", HourlyRate = 25, HoursWorked = 15 };
+            var emp1 = new Employee { EmployeeNumber = 1, Name = "Test 1" };
 
             await _context.Employees.AddAsync(emp1);
             await _context.SaveChangesAsync();
 
-            // Create a new context (simulate a second insert attempt elsewhere)
+            // Create new context to simulate another operation trying to insert the same key
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase("TestDb") // use same db
+                .UseInMemoryDatabase("TestDb") // same DB
                 .Options;
 
             using var newContext = new AppDbContext(options);
+            var emp2 = new Employee { EmployeeNumber = 1, Name = "Test 2" };
+
             await newContext.Employees.AddAsync(emp2);
 
             Assert.ThrowsAsync<ArgumentException>(async () =>

@@ -6,16 +6,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmployeeSystem.Domain.Entities
+namespace EmployeeSystem.Data.Models
 {
-    public class Employee
+    public class EmployeeWorkRecord
     {
         [Key]
+        [ForeignKey("Employee")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int EmployeeNumber { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public decimal HourlyRate { get; set; }
-        public decimal HoursWorked { get; set; }
-        public decimal TotalPay => HourlyRate * HoursWorked;
+        public decimal? HourlyRate { get; set; }
+        public decimal? HoursWorked { get; set; }
+
+        public Employee Employee { get; set; } = null!;
+
     }
 }

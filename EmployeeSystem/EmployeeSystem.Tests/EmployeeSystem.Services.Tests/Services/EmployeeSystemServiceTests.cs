@@ -1,5 +1,5 @@
-﻿using EmployeeSystem.Data.Repositories.Interfaces;
-using EmployeeSystem.Domain.Entities;
+﻿using EmployeeSystem.Data.Models;
+using EmployeeSystem.Data.Repositories.Interfaces;
 using EmployeeSystem.Services;
 using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Interfaces;
@@ -37,8 +37,12 @@ namespace EmployeeSystem.Tests.Services
             {
                 EmployeeNumber = 1,
                 Name = "Vivek",
-                HourlyRate = 50,
-                HoursWorked = 40
+                WorkRecord = new EmployeeWorkRecord
+                {
+                    EmployeeNumber = 1,
+                    HourlyRate = 50,
+                    HoursWorked = 40
+                }
             };
 
             _mapperMock.Setup(m => m.ToEntity(dto)).Returns(entity);
@@ -52,22 +56,43 @@ namespace EmployeeSystem.Tests.Services
         [Test]
         public async Task UpdateAsync_WhenExists_ShouldUpdateAndSave()
         {
-            var emp = new Employee { EmployeeNumber = 1, Name = "Old", HourlyRate = 10, HoursWorked = 5 };
-            var dto = new EmployeeDto { EmployeeNumber = 1, Name = "New", HourlyRate = 20, HoursWorked = 10 };
+            var emp = new Employee
+            {
+                EmployeeNumber = 1,
+                Name = "Old",
+                WorkRecord = new EmployeeWorkRecord
+                {
+                    EmployeeNumber = 1,
+                    HourlyRate = 10,
+                    HoursWorked = 5
+                }
+            };
+
+            var dto = new EmployeeDto
+            {
+                EmployeeNumber = 1,
+                Name = "New",
+                HourlyRate = 20,
+                HoursWorked = 10
+            };
 
             _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(emp);
+
             _mapperMock.Setup(m => m.UpdateEntity(emp, dto)).Callback(() =>
             {
                 emp.Name = dto.Name;
-                emp.HourlyRate = dto.HourlyRate;
-                emp.HoursWorked = dto.HoursWorked;
+                if (emp.WorkRecord != null)
+                {
+                    emp.WorkRecord.HourlyRate = dto.HourlyRate;
+                    emp.WorkRecord.HoursWorked = dto.HoursWorked;
+                }
             });
 
             await _service.UpdateAsync(dto);
 
             Assert.That(emp.Name, Is.EqualTo("New"));
-            Assert.That(emp.HourlyRate, Is.EqualTo(20));
-            Assert.That(emp.HoursWorked, Is.EqualTo(10));
+            Assert.That(emp.WorkRecord!.HourlyRate, Is.EqualTo(20));
+            Assert.That(emp.WorkRecord.HoursWorked, Is.EqualTo(10));
 
             _repoMock.Verify(r => r.UpdateAsync(emp), Times.Once);
             _repoMock.Verify(r => r.SaveChangesAsync(), Times.Once);

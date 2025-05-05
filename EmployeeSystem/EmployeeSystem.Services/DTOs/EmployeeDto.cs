@@ -10,7 +10,7 @@ namespace EmployeeSystem.Services.DTOs
     {
         public int EmployeeNumber { get; set; }
         public string Name { get; set; } = string.Empty;
-        public decimal HourlyRate { get; set; }
-        public decimal HoursWorked { get; set; }
+        public decimal? HourlyRate { get; set; }
+        public decimal? HoursWorked { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using EmployeeSystem.Data.Interfaces;
-using EmployeeSystem.Domain.Entities;
+using EmployeeSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeSystem.Data
@@ -8,11 +8,25 @@ namespace EmployeeSystem.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<Employee> Employees => Set<Employee>();
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<EmployeeWorkRecord> EmployeeWorkRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Employee>().HasKey(e => e.EmployeeNumber);
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.WorkRecord)
+                .WithOne(w => w.Employee)
+                .HasForeignKey<EmployeeWorkRecord>(w => w.EmployeeNumber);
+
+            modelBuilder.Entity<EmployeeWorkRecord>()
+            .Property(w => w.HourlyRate)
+            .HasPrecision(18, 2);
+
+            modelBuilder.Entity<EmployeeWorkRecord>()
+                .Property(w => w.HoursWorked)
+                .HasPrecision(18, 2);
         }
     }
 }

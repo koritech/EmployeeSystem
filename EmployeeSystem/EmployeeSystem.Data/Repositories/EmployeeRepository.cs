@@ -2,6 +2,7 @@
 using EmployeeSystem.Domain.Entities;
 using EmployeeSystem.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using EmployeeSystem.Data.Models;
 
 namespace EmployeeSystem.Data.Repositories
 {
@@ -16,7 +17,9 @@ namespace EmployeeSystem.Data.Repositories
 
         public async Task<IEnumerable<Employee>> GetAllAsync(string? nameFilter, int page, int pageSize)
         {
-            var query = _context.Employees.AsQueryable();
+            var query = _context.Employees
+                .Include(e => e.WorkRecord)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(nameFilter))
                 query = query.Where(e => e.Name.Contains(nameFilter));
@@ -29,7 +32,7 @@ namespace EmployeeSystem.Data.Repositories
 
         public Task<Employee?> GetByIdAsync(int employeeNumber)
         {
-            return _context.Employees.FindAsync(employeeNumber).AsTask();
+            return _context.Employees.Include(e => e.WorkRecord).FirstOrDefaultAsync(e => e.EmployeeNumber == employeeNumber);
         }
 
         public async Task AddAsync(Employee employee)

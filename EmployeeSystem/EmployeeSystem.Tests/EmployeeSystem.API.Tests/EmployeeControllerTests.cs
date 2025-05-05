@@ -13,19 +13,19 @@ namespace EmployeeSystem.Tests.API
     {
         private Mock<IEmployeeService> _commandServiceMock = null!;
         private Mock<IEmployeeQueryService> _queryServiceMock = null!;
-        private Mock<ILogger<EmployeeController>> _loggerMock = null!;
+        private Mock<ILogger<EmployeesController>> _loggerMock = null!;
         private Mock<IRequestValidator> _validatorMock = null!;
-        private EmployeeController _controller = null!;
+        private EmployeesController _controller = null!;
 
         [SetUp]
         public void Setup()
         {
             _commandServiceMock = new Mock<IEmployeeService>();
             _queryServiceMock = new Mock<IEmployeeQueryService>();
-            _loggerMock = new Mock<ILogger<EmployeeController>>();
+            _loggerMock = new Mock<ILogger<EmployeesController>>();
             _validatorMock = new Mock<IRequestValidator>();
 
-            _controller = new EmployeeController(
+            _controller = new EmployeesController(
                 _commandServiceMock.Object,
                 _queryServiceMock.Object,
                 _loggerMock.Object,
@@ -39,9 +39,9 @@ namespace EmployeeSystem.Tests.API
             _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "pageSize")).Returns(new ValidationResult());
 
             var employees = new List<EmployeeDto> { new() { EmployeeNumber = 1, Name = "Vivek" } };
-            _queryServiceMock.Setup(s => s.GetAllAsync(null, 1, 50)).ReturnsAsync(employees);
+            _queryServiceMock.Setup(s => s.GetAllEmployeesAsync(null, 1, 50)).ReturnsAsync(employees);
 
-            var result = await _controller.GetAll(null);
+            var result = await _controller.GetAllEmployees(null);
 
             Assert.That(result, Is.TypeOf<OkObjectResult>());
             var data = (result as OkObjectResult)!.Value as List<EmployeeDto>;
@@ -56,7 +56,7 @@ namespace EmployeeSystem.Tests.API
             _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "pageSize"))
                 .Returns(new ValidationResult());
 
-            var result = await _controller.GetAll(null, 0);
+            var result = await _controller.GetAllEmployees(null, 0);
 
             var badResult = result as BadRequestObjectResult;
             Assert.That(badResult, Is.Not.Null);
@@ -70,9 +70,9 @@ namespace EmployeeSystem.Tests.API
         {
             _validatorMock.Setup(v => v.ValidateNumber(1, "employeeNumber")).Returns(new ValidationResult());
             var dto = new EmployeeDto { EmployeeNumber = 1, Name = "John" };
-            _queryServiceMock.Setup(s => s.GetByNumberAsync(1)).ReturnsAsync(dto);
+            _queryServiceMock.Setup(s => s.GetByEmployeeNumberAsync(1)).ReturnsAsync(dto);
 
-            var result = await _controller.Get(1);
+            var result = await _controller.GetEmployeeByNumber(1);
 
             Assert.That(result, Is.TypeOf<OkObjectResult>());
             Assert.That(((OkObjectResult)result).Value, Is.EqualTo(dto));
@@ -84,7 +84,7 @@ namespace EmployeeSystem.Tests.API
             _validatorMock.Setup(v => v.ValidateNumber(0, "employeeNumber"))
                 .Returns(new ValidationResult { Errors = { "Invalid employee number" } });
 
-            var result = await _controller.Get(0);
+            var result = await _controller.GetEmployeeByNumber(0);
 
             var badResult = result as BadRequestObjectResult;
             Assert.That(badResult, Is.Not.Null);
@@ -99,7 +99,7 @@ namespace EmployeeSystem.Tests.API
             var dto = new EmployeeDto { EmployeeNumber = 10, Name = "Alice" };
             _validatorMock.Setup(v => v.Validate(dto)).Returns(new ValidationResult());
 
-            var result = await _controller.Create(dto);
+            var result = await _controller.CreateEmployee(dto);
 
             Assert.That(result, Is.TypeOf<CreatedAtActionResult>());
             Assert.That(((CreatedAtActionResult)result).RouteValues!["employeeNumber"], Is.EqualTo(dto.EmployeeNumber));
@@ -111,7 +111,7 @@ namespace EmployeeSystem.Tests.API
             var dto = new EmployeeDto();
             _validatorMock.Setup(v => v.Validate(dto)).Returns(new ValidationResult { Errors = { "Name is required" } });
 
-            var result = await _controller.Create(dto);
+            var result = await _controller.CreateEmployee(dto);
 
             var bad = result as BadRequestObjectResult;
             Assert.That(bad, Is.Not.Null);
@@ -125,7 +125,7 @@ namespace EmployeeSystem.Tests.API
         {
             var dto = new EmployeeDto { EmployeeNumber = 1 };
 
-            var result = await _controller.Update(2, dto);
+            var result = await _controller.UpdateEmployee(2, dto);
 
             var bad = result as BadRequestObjectResult;
             Assert.That(bad, Is.Not.Null);
@@ -140,7 +140,7 @@ namespace EmployeeSystem.Tests.API
             var dto = new EmployeeDto { EmployeeNumber = 5 };
             _validatorMock.Setup(v => v.Validate(dto)).Returns(new ValidationResult { Errors = { "Invalid name" } });
 
-            var result = await _controller.Update(5, dto);
+            var result = await _controller.UpdateEmployee(5, dto);
 
             var bad = result as BadRequestObjectResult;
             Assert.That(bad, Is.Not.Null);
@@ -155,7 +155,7 @@ namespace EmployeeSystem.Tests.API
             _validatorMock.Setup(v => v.ValidateNumber(-1, "employeeNumber"))
                 .Returns(new ValidationResult { Errors = { "Invalid id" } });
 
-            var result = await _controller.Delete(-1);
+            var result = await _controller.DeleteEmployee(-1);
             var bad = result as BadRequestObjectResult;
 
             Assert.That(bad, Is.Not.Null);

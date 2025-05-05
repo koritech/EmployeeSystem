@@ -9,8 +9,8 @@ namespace EmployeeSystem.Services.Interfaces
 {
     public interface IEmployeeQueryService
     {
-        Task<IEnumerable<EmployeeDto>> GetAllAsync(string? nameFilter, int page, int pageSize);
-        Task<EmployeeDto?> GetByNumberAsync(int employeeNumber);
-        Task DeleteAsync(int employeeNumber);
+        Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync(string? nameFilter, int page, int pageSize);
+        Task<EmployeeDto?> GetByEmployeeNumberAsync(int employeeNumber);
+        Task DeleteEmployeeAsync(int employeeNumber);
     }
 }

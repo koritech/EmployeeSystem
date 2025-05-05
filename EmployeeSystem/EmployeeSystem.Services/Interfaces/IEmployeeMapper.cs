@@ -1,4 +1,5 @@
-﻿using EmployeeSystem.Domain.Entities;
+﻿using EmployeeSystem.Data.Models;
+using EmployeeSystem.Domain.Entities;
 using EmployeeSystem.Services.DTOs;
 
 namespace EmployeeSystem.Services.Interfaces
