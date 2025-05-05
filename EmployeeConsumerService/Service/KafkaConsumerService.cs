@@ -9,12 +9,14 @@ namespace Application.Services;
 public class KafkaConsumerService : IKafkaConsumerService
 {
     private readonly IEmployeeService _employeeService;
+    private readonly IEmployeeQueryService _employeeQueryService;
     private readonly string _bootstrapServers = "localhost:9092";
-    private readonly string _topic = "employee-updatez";
+    private readonly string _topic = "employee-updates-test";
 
-    public KafkaConsumerService(IEmployeeService employeeService)
+    public KafkaConsumerService(IEmployeeService employeeService, IEmployeeQueryService employeeQueryService)
     {
         _employeeService = employeeService;
+        _employeeQueryService = employeeQueryService;
     }
 
     public async Task StartConsumingAsync(CancellationToken cancellationToken)
@@ -24,7 +26,8 @@ public class KafkaConsumerService : IKafkaConsumerService
             BootstrapServers = _bootstrapServers,
             GroupId = "employee-consumer-group",
             AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnableAutoCommit = false
+            EnableAutoCommit = false,
+            SessionTimeoutMs = 6000
         };
 
         using var consumer = new ConsumerBuilder<string, string>(config).Build();
@@ -34,23 +37,46 @@ public class KafkaConsumerService : IKafkaConsumerService
         {
             while (!cancellationToken.IsCancellationRequested)
             {
+                ConsumeResult<string, string>? result = null;
+
                 try
                 {
-                    var result = consumer.Consume(cancellationToken);
+                    result = consumer.Consume(cancellationToken);
+                    if (result?.Message?.Value is null)
+                    {
+                        Console.WriteLine("[Kafka] Null or empty message received.");
+                        continue;
+                    }
 
                     Console.WriteLine($"[Kafka] Received: {result.Message.Value}");
 
                     var dto = JsonConvert.DeserializeObject<EmployeeDto>(result.Message.Value);
 
-                    if (dto != null)
+                    if (dto is null)
                     {
-                        await _employeeService.AddAsync(dto);
-                        Console.WriteLine($"[DB] Saved employee #{dto.EmployeeNumber}");
-                        consumer.Commit(result);
+                        Console.WriteLine("[Error] Failed to deserialize Kafka message.");
+                        continue;
+                    }
+
+                    var existing = await _employeeQueryService.GetByNumberAsync(dto.EmployeeNumber);
+                    if (existing != null)
+                    {
+                        await _employeeService.UpdateAsync(dto);
                     }
                     else
                     {
-                        Console.WriteLine("[Error] Failed to deserialize message.");
+                        await _employeeService.AddAsync(dto);
+                    }
+
+                    Console.WriteLine($"[DB] Processed employee #{dto.EmployeeNumber}");
+
+                    try
+                    {
+                        consumer.Commit(result);
+                    }
+                    catch (KafkaException kex)
+                    {
+                        Console.WriteLine($"[Kafka Commit Error] {kex.Message}");
                     }
                 }
                 catch (ConsumeException ex)
@@ -59,7 +85,7 @@ public class KafkaConsumerService : IKafkaConsumerService
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[Processing Error] {ex.Message}");
+                    Console.WriteLine($"[Processing Error] {ex}");
                 }
             }
         }
