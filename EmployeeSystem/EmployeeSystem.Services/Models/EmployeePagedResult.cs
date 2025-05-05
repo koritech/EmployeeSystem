@@ -4,7 +4,7 @@ namespace EmployeeSystem.Services.Models
 {
     public class EmployeePagedResult
     {
-        public IEnumerable<EmployeeDto> Data { get; set; } = Enumerable.Empty<EmployeeDto>();
+        public IEnumerable<EmployeeResponseDto> Data { get; set; } = Enumerable.Empty<EmployeeResponseDto>();
         public int Page { get; set; }
         public int PageSize { get; set; }
         public int TotalCount { get; set; }

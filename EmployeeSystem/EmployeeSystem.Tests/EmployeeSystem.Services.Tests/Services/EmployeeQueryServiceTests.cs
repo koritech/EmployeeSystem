@@ -38,7 +38,7 @@ namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.Services
             _repoMock.Setup(r => r.GetAllWithCountAsync(null, 1, 10))
                 .ReturnsAsync((employees, 1)); 
 
-            _mapperMock.Setup(m => m.ToDto(It.IsAny<Employee>())).Returns((Employee e) => new EmployeeDto
+            _mapperMock.Setup(m => m.ToDto(It.IsAny<Employee>())).Returns((Employee e) => new EmployeeResponseDto
             {
                 EmployeeNumber = e.EmployeeNumber,
                 Name = e.Name,
@@ -68,7 +68,7 @@ namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.Services
                 WorkRecord = new EmployeeWorkRecord { HourlyRate = 20, HoursWorked = 8 }
             };
 
-            var dto = new EmployeeDto
+            var dto = new EmployeeResponseDto
             {
                 EmployeeNumber = 1,
                 Name = "B",

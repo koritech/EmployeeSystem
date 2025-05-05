@@ -1,5 +1,4 @@
 ﻿using EmployeeSystem.Data.Models;
-using EmployeeSystem.Domain.Entities;
 using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Interfaces;
 
@@ -7,7 +6,7 @@ namespace EmployeeSystem.Services.Mappers
 {
     public class EmployeeMapper : IEmployeeMapper
     {
-        public EmployeeDto ToDto(Employee e) => new()
+        public EmployeeResponseDto ToDto(Employee e) => new()
         {
             EmployeeNumber = e.EmployeeNumber,
             Name = e.Name,

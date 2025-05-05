@@ -30,7 +30,7 @@ namespace EmployeeSystem.Services.Services
         }
 
 
-        public async Task<EmployeeDto?> GetByEmployeeNumberAsync(int employeeNumber)
+        public async Task<EmployeeResponseDto?> GetByEmployeeNumberAsync(int employeeNumber)
         {
             var entity = await _repo.GetByIdAsync(employeeNumber);
             return entity is null ? null : _mapper.ToDto(entity);

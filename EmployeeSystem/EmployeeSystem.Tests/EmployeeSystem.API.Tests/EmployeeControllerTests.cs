@@ -46,10 +46,10 @@ namespace EmployeeSystem.Tests.API
                 Page = 1,
                 PageSize = 50,
                 TotalCount = 1,
-                Data = new List<EmployeeDto>
-        {
-            new EmployeeDto { EmployeeNumber = 1, Name = "Vivek" }
-        }
+                Data = new List<EmployeeResponseDto>
+                {
+                    new EmployeeResponseDto { EmployeeNumber = 1, Name = "Vivek" }
+                }
             };
 
             _queryServiceMock.Setup(s => s.GetAllEmployeesPagedAsync(null, 1, 50))
@@ -90,7 +90,7 @@ namespace EmployeeSystem.Tests.API
         public async Task Get_ValidId_ReturnsOk()
         {
             _validatorMock.Setup(v => v.ValidateNumber(1, "employeeNumber")).Returns(new ValidationResult());
-            var dto = new EmployeeDto { EmployeeNumber = 1, Name = "John" };
+            var dto = new EmployeeResponseDto { EmployeeNumber = 1, Name = "John" };
             _queryServiceMock.Setup(s => s.GetByEmployeeNumberAsync(1)).ReturnsAsync(dto);
 
             var result = await _controller.GetEmployeeByNumber(1);
