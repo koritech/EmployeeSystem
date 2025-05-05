@@ -30,7 +30,7 @@ public class EmployeesController : ControllerBase
     public async Task<IActionResult> GetAllEmployees([FromQuery] string? name, int page = 1, int pageSize = 50)
     {
         var pageValidation = _requestValidator.ValidateNumber(page, nameof(page));
-        var sizeValidation = _requestValidator.ValidateNumber(pageSize, nameof(pageSize));
+        var sizeValidation = _requestValidator.ValidatePageSize(pageSize, nameof(pageSize));
 
         if (!pageValidation.IsValid || !sizeValidation.IsValid)
             return BadRequest(new { Errors = pageValidation.Errors.Concat(sizeValidation.Errors) });

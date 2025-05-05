@@ -15,6 +15,16 @@ namespace EmployeeSystem.Services.Validator
             return result;
         }
 
+        public ValidationResult ValidatePageSize(int number, string fieldName)
+        {
+            var result = new ValidationResult();
+            if (number <= 0)
+                result.Errors.Add($"{fieldName} must be greater than 0.");
+            if (number > 50)
+                result.Errors.Add($"{fieldName} must be less than or equal to 50.");
+            return result;
+        }
+
         public ValidationResult Validate<T>(T model)
         {
             var result = new ValidationResult();

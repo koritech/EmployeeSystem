@@ -6,5 +6,6 @@ namespace EmployeeSystem.Services.Validation
     {
         ValidationResult Validate<T>(T model);
         ValidationResult ValidateNumber(int number, string fieldName);
+        ValidationResult ValidatePageSize(int number, string fieldName);
     }
 }
