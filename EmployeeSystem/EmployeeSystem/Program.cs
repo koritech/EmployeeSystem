@@ -13,6 +13,7 @@ using EmployeeSystem.Services.Mappers;
 using EmployeeSystem.Services.Validation;
 using EmployeeSystem.Services.Validator;
 using EmployeeSystem;
+using EmployeeSystem.Services.Services;
 
 public class Program
 {
@@ -43,6 +44,7 @@ public class Program
 
         builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         builder.Services.AddScoped<IEmployeeMapper, EmployeeMapper>();
+        builder.Services.AddScoped<IEmployeeQueryService,EmployeeQueryService>();
         builder.Services.AddScoped<DbEmployeeService>();
         builder.Services.AddScoped<KafkaEmployeeService>();
         builder.Services.AddScoped<IKafkaProducer, KafkaProducer>();
