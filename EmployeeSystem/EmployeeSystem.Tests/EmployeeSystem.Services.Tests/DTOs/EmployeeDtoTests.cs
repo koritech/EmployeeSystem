@@ -13,8 +13,8 @@ namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.DTOs
 
             Assert.AreEqual(0, dto.EmployeeNumber);
             Assert.AreEqual(string.Empty, dto.Name);
-            Assert.AreEqual(0m, dto.HourlyRate);
-            Assert.AreEqual(0m, dto.HoursWorked);
+            Assert.AreEqual(null, dto.HourlyRate);
+            Assert.AreEqual(null, dto.HoursWorked);
         }
 
         [Test]

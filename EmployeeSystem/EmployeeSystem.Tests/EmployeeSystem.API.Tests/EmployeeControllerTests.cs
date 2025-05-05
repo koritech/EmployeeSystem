@@ -35,17 +35,38 @@ namespace EmployeeSystem.Tests.API
         [Test]
         public async Task GetAll_ValidInput_ReturnsOk()
         {
-            _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "page")).Returns(new ValidationResult());
-            _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "pageSize")).Returns(new ValidationResult());
+            // Arrange
+            _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "page"))
+                          .Returns(new ValidationResult());
+            _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "pageSize"))
+                          .Returns(new ValidationResult());
 
-            var employees = new List<EmployeeDto> { new() { EmployeeNumber = 1, Name = "Vivek" } };
-            _queryServiceMock.Setup(s => s.GetAllEmployeesAsync(null, 1, 50)).ReturnsAsync(employees);
+            var pagedResult = new EmployeePagedResult
+            {
+                Page = 1,
+                PageSize = 50,
+                TotalCount = 1,
+                Data = new List<EmployeeDto>
+        {
+            new EmployeeDto { EmployeeNumber = 1, Name = "Vivek" }
+        }
+            };
 
+            _queryServiceMock.Setup(s => s.GetAllEmployeesPagedAsync(null, 1, 50))
+                             .ReturnsAsync(pagedResult);
+
+            // Act
             var result = await _controller.GetAllEmployees(null);
 
+            // Assert
             Assert.That(result, Is.TypeOf<OkObjectResult>());
-            var data = (result as OkObjectResult)!.Value as List<EmployeeDto>;
-            Assert.That(data!.Count, Is.EqualTo(1));
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+
+            var returnedResult = okResult!.Value as EmployeePagedResult;
+            Assert.That(returnedResult, Is.Not.Null);
+            Assert.That(returnedResult!.TotalCount, Is.EqualTo(1));
+            Assert.That(returnedResult.Data.First().Name, Is.EqualTo("Vivek"));
         }
 
         [Test]

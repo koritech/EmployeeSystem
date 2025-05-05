@@ -26,16 +26,17 @@ namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.Services
         public async Task GetAllAsync_ShouldMapEntitiesToDtos()
         {
             var employees = new List<Employee>
-        {
-            new Employee
             {
-                EmployeeNumber = 1,
-                Name = "A",
-                WorkRecord = new EmployeeWorkRecord { HourlyRate = 10, HoursWorked = 5 }
-            }
-        };
+                new Employee
+                {
+                    EmployeeNumber = 1,
+                    Name = "A",
+                    WorkRecord = new EmployeeWorkRecord { HourlyRate = 10, HoursWorked = 5 }
+                }
+            };
 
-            _repoMock.Setup(r => r.GetAllAsync(null, 1, 10)).ReturnsAsync(employees);
+            _repoMock.Setup(r => r.GetAllWithCountAsync(null, 1, 10))
+                .ReturnsAsync((employees, 1)); 
 
             _mapperMock.Setup(m => m.ToDto(It.IsAny<Employee>())).Returns((Employee e) => new EmployeeDto
             {
@@ -45,13 +46,17 @@ namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.Services
                 HoursWorked = e.WorkRecord?.HoursWorked ?? 0
             });
 
-            var result = await _service.GetAllEmployeesAsync(null, 1, 10);
+            var result = await _service.GetAllEmployeesPagedAsync(null, 1, 10);
 
-            Assert.That(result.Count(), Is.EqualTo(1));
-            var dto = result.First();
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.TotalCount, Is.EqualTo(1));
+            Assert.That(result.Data.Count(), Is.EqualTo(1));
+
+            var dto = result.Data.First();
             Assert.That(dto.EmployeeNumber, Is.EqualTo(1));
             Assert.That(dto.Name, Is.EqualTo("A"));
         }
+
 
         [Test]
         public async Task GetByNumberAsync_WhenExists_ShouldReturnDto()

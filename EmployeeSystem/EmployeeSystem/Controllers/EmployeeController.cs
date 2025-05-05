@@ -35,7 +35,7 @@ public class EmployeesController : ControllerBase
         if (!pageValidation.IsValid || !sizeValidation.IsValid)
             return BadRequest(new { Errors = pageValidation.Errors.Concat(sizeValidation.Errors) });
 
-        var result = await _employeeQueryService.GetAllEmployeesAsync(name, page, pageSize);
+        var result = await _employeeQueryService.GetAllEmployeesPagedAsync(name, page, pageSize);
         return Ok(result);
     }
 

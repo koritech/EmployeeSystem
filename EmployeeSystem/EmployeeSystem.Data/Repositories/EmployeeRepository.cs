@@ -15,19 +15,21 @@ namespace EmployeeSystem.Data.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Employee>> GetAllAsync(string? nameFilter, int page, int pageSize)
+        public async Task<(IEnumerable<Employee> Data, int TotalCount)> GetAllWithCountAsync(string? nameFilter, int page, int pageSize)
         {
-            var query = _context.Employees
-                .Include(e => e.WorkRecord)
-                .AsQueryable();
+            var query = _context.Employees.Include(e => e.WorkRecord).AsQueryable();
 
             if (!string.IsNullOrEmpty(nameFilter))
                 query = query.Where(e => e.Name.Contains(nameFilter));
 
-            return await query
+            var totalCount = await query.CountAsync();
+
+            var data = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+            return (data, totalCount);
         }
 
         public Task<Employee?> GetByIdAsync(int employeeNumber)
