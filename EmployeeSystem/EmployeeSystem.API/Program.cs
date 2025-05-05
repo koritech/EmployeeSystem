@@ -13,6 +13,7 @@ using EmployeeSystem.Services.Mappers;
 using EmployeeSystem.Services.Validation;
 using EmployeeSystem.Services.Validator;
 using EmployeeSystem;
+using EmployeeSystem.Services.Services;
 
 public class Program
 {
@@ -43,22 +44,25 @@ public class Program
 
         builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         builder.Services.AddScoped<IEmployeeMapper, EmployeeMapper>();
+        builder.Services.AddScoped<IEmployeeQueryService, EmployeeQueryService>();
         builder.Services.AddScoped<DbEmployeeService>();
         builder.Services.AddScoped<KafkaEmployeeService>();
-        builder.Services.AddScoped<IKafkaProducer, KafkaProducer>();
+        builder.Services.Configure<KafkaSettings>(
+        builder.Configuration.GetSection("KafkaSettings"));
+
         builder.Services.AddSingleton<IProducer<string, string>>(sp =>
         {
-            var kafkaSettings = sp.GetRequiredService<IOptions<KafkaSettings>>().Value;
+            var settings = sp.GetRequiredService<IOptions<KafkaSettings>>().Value;
 
             var config = new ProducerConfig
             {
-                BootstrapServers = kafkaSettings.BootstrapServers,
-                Acks = Enum.TryParse<Acks>(kafkaSettings.Acks, out var ack) ? ack : Acks.All,
-                EnableIdempotence = kafkaSettings.EnableIdempotence
+                BootstrapServers = settings.BootstrapServers
             };
 
             return new ProducerBuilder<string, string>(config).Build();
         });
+
+        builder.Services.AddScoped<IKafkaProducer, KafkaProducer>();
         builder.Services.AddScoped<IEmployeeServiceFactory, EmployeeServiceFactory>();
         builder.Services.AddScoped<IEmployeeService>(provider =>
         {
@@ -66,7 +70,7 @@ public class Program
             var mode = httpContext?.Request.Headers["X-Processing-Mode"].FirstOrDefault()?.ToLower() ?? "db";
 
             var factory = provider.GetRequiredService<IEmployeeServiceFactory>();
-            return factory.GetService(mode); 
+            return factory.GetService(mode);
         });
 
         builder.Services.AddHttpContextAccessor();
