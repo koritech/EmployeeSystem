@@ -9,7 +9,7 @@ namespace EmployeeSystem.Services
     public class KafkaEmployeeService : IEmployeeService
     {
         private readonly IKafkaProducer _producer;
-        private readonly string _topic = "employee-updates";
+        private readonly string _topic = "employee-updates-test";
 
         public KafkaEmployeeService(IKafkaProducer producer)
         {
