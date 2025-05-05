@@ -58,7 +58,7 @@ public class KafkaConsumerService : IKafkaConsumerService
                         continue;
                     }
 
-                    var existing = await _employeeQueryService.GetByNumberAsync(dto.EmployeeNumber);
+                    var existing = await _employeeQueryService.GetByEmployeeNumberAsync(dto.EmployeeNumber);
                     if (existing != null)
                     {
                         await _employeeService.UpdateAsync(dto);
