@@ -3,6 +3,7 @@ using EmployeeSystem.Data.Repositories.Interfaces;
 using EmployeeSystem.Services;
 using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace EmployeeSystem.Tests.Services
@@ -12,6 +13,7 @@ namespace EmployeeSystem.Tests.Services
     {
         private Mock<IEmployeeRepository> _repoMock = null!;
         private Mock<IEmployeeMapper> _mapperMock = null!;
+        private Mock<Microsoft.Extensions.Logging.ILogger<DbEmployeeService>> _loggerMock = null!;
         private DbEmployeeService _service = null!;
 
         [SetUp]
@@ -19,7 +21,8 @@ namespace EmployeeSystem.Tests.Services
         {
             _repoMock = new Mock<IEmployeeRepository>();
             _mapperMock = new Mock<IEmployeeMapper>();
-            _service = new DbEmployeeService(_repoMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<DbEmployeeService>>();
+            _service = new DbEmployeeService(_repoMock.Object, _mapperMock.Object, _loggerMock.Object);
         }
 
         [Test]

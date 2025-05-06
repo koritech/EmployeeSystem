@@ -1,5 +1,4 @@
 ﻿using EmployeeSystem.Data.Models;
-using EmployeeSystem.Domain.Entities;
 
 namespace EmployeeSystem.Data.Repositories.Interfaces
 {

@@ -25,10 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EmployeeSystem.API\EmployeeSystem.API.csproj" />
     <ProjectReference Include="..\EmployeeSystem.Data\EmployeeSystem.Data.csproj" />
     <ProjectReference Include="..\EmployeeSystem.Domain\EmployeeSystem.Domain.csproj" />
     <ProjectReference Include="..\EmployeeSystem.Services\EmployeeSystem.Services.csproj" />
-    <ProjectReference Include="..\EmployeeSystem\EmployeeSystem.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,62 @@
+Softwares needed to run
+
+1. GitHub - To manage source code  
+2. Docker - To run Kafka locally  
+3. SSMS (SQL Server Management Studio) - To view and manage the database  
+4. Visual Studio - To run and develop the .NET projects  
+
+Kafka Setup Using Docker
+
+1. Install Docker on your machine  
+2. Go to the folder:  
+   C:\GitHub\Assignment\Kafka-Docker  
+3. Open Command Prompt in that folder  
+4. Run this command to start Kafka:  
+   docker-compose up -d  
+5. To open Kafka UI, go to your browser and open:  
+   http://localhost:8080  
+6. To stop Kafka, run this command:  
+   docker-compose down  
+
+KafkaConsumer Service
+
+After starting Kafka, run this service to listen to Kafka topic and write to the database.  
+If employee already exists, it will update the record.  
+If not, it will create a new one.
+
+EmployeeSystem.API
+
+This is the API to create, update, delete, and get employees (with filters).  
+It also works as a Kafka producer for create and update operations.
+
+Running Entity Framework Commands
+
+Before running the API or KafkaConsumer, run the EF migration commands to update or create the database.
+
+To create a migration:
+dotnet ef migrations add FixDecimalTypes --project C:\GitHub\Assignment\EmployeeSystem\EmployeeSystem.Data --startup-project C:\GitHub\Assignment\EmployeeSystem\EmployeeSystem
+
+To update the database:
+dotnet ef database update --project C:\GitHub\Assignment\EmployeeSystem\EmployeeSystem.Data --startup-project C:\GitHub\Assignment\EmployeeSystem\EmployeeSystem
+
+To remove the last migration:
+dotnet ef migrations remove --project C:\GitHub\Assignment\EmployeeSystem\EmployeeSystem.Data --startup-project C:\GitHub\Assignment\EmployeeSystem\EmployeeSystem
+
+Note: The DbContext is inside the Data layer.
+
+Note:
+
+The create and update APIs are used both for direct DB access and Kafka.  
+Depending on the processing mode, the system will use the right service using strategy and repository pattern.
+
+Kafka Console Producer
+
+A simple .NET console app that sends test messages to a Kafka topic.
+
+Logs: 
+Logs are written using log4net in the folder
+C:\Logs
+
+Swagger : 
+Swagger for API documentation
+
