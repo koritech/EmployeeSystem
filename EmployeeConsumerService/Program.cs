@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using EmployeeSystem.Data.Interfaces;
 using EmployeeSystem.Services.Mappers;
 using EmployeeSystem.Services.Services;
+using EmployeeConsumerService.Model;
 
 Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -17,6 +18,9 @@ Host.CreateDefaultBuilder(args)
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
                 context.Configuration.GetConnectionString("DefaultConnection")));
+
+        services.Configure<KafkaConsumerSettings>(
+        context.Configuration.GetSection("KafkaConsumer"));
 
         //Register application services
         services.AddScoped<IEmployeeService, DbEmployeeService>();

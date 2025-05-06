@@ -1,7 +1,9 @@
 ﻿using Confluent.Kafka;
 using EmployeeConsumerService.Domain.Interfaces;
+using EmployeeConsumerService.Model;
 using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Interfaces;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Application.Services;
@@ -10,28 +12,28 @@ public class KafkaConsumerService : IKafkaConsumerService
 {
     private readonly IEmployeeService _employeeService;
     private readonly IEmployeeQueryService _employeeQueryService;
-    private readonly string _bootstrapServers = "localhost:9092";
-    private readonly string _topic = "employee-updates-test";
+    private readonly KafkaConsumerSettings _settings;
 
-    public KafkaConsumerService(IEmployeeService employeeService, IEmployeeQueryService employeeQueryService)
+    public KafkaConsumerService(IEmployeeService employeeService, IEmployeeQueryService employeeQueryService, IOptions<KafkaConsumerSettings> options)
     {
         _employeeService = employeeService;
         _employeeQueryService = employeeQueryService;
+        _settings = options.Value;
     }
 
     public async Task StartConsumingAsync(CancellationToken cancellationToken)
     {
         var config = new ConsumerConfig
         {
-            BootstrapServers = _bootstrapServers,
-            GroupId = "employee-consumer-group",
-            AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnableAutoCommit = false,
-            SessionTimeoutMs = 6000
+            BootstrapServers = _settings.BootstrapServers,
+            GroupId = _settings.GroupId,
+            AutoOffsetReset = Enum.TryParse<AutoOffsetReset>(_settings.AutoOffsetReset, out var offset) ? offset : AutoOffsetReset.Latest,
+            EnableAutoCommit = _settings.EnableAutoCommit,
+            SessionTimeoutMs = _settings.SessionTimeoutMs
         };
 
         using var consumer = new ConsumerBuilder<string, string>(config).Build();
-        consumer.Subscribe(_topic);
+        consumer.Subscribe(_settings.Topic);
 
         try
         {
