@@ -2,91 +2,123 @@
 using EmployeeSystem.Services.Interfaces;
 using EmployeeSystem.Services.Validation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
-[ApiController]
-[Route("api/employees")]
-public class EmployeesController : ControllerBase
+
+namespace EmployeeSystem.API.Controllers
 {
-    private readonly IEmployeeService _employeeService;
-    private readonly IEmployeeQueryService _employeeQueryService;
-    private readonly ILogger<EmployeesController> _logger;
-    private readonly IRequestValidator _requestValidator;
-
-    public EmployeesController(
-        IEmployeeService employeeService,
-        IEmployeeQueryService employeeQueryService,
-        ILogger<EmployeesController> logger,
-        IRequestValidator requestValidator)
+    [ApiController]
+    [Route("api/employees")]
+    public class EmployeesController : ControllerBase
     {
-        _employeeService = employeeService;
-        _employeeQueryService = employeeQueryService;
-        _logger = logger;
-        _requestValidator = requestValidator;
-    }
+        private readonly IEmployeeService _employeeService;
+        private readonly IEmployeeQueryService _employeeQueryService;
+        private readonly ILogger<EmployeesController> _logger;
+        private readonly IRequestValidator _requestValidator;
 
-    // GET: api/employees
-    [HttpGet]
-    public async Task<IActionResult> GetAllEmployees([FromQuery] string? name, int page = 1, int pageSize = 50)
-    {
-        var pageValidation = _requestValidator.ValidateNumber(page, nameof(page));
-        var sizeValidation = _requestValidator.ValidatePageSize(pageSize, nameof(pageSize));
+        public EmployeesController(
+            IEmployeeService employeeService,
+            IEmployeeQueryService employeeQueryService,
+            ILogger<EmployeesController> logger,
+            IRequestValidator requestValidator)
+        {
+            _employeeService = employeeService;
+            _employeeQueryService = employeeQueryService;
+            _logger = logger;
+            _requestValidator = requestValidator;
+        }
 
-        if (!pageValidation.IsValid || !sizeValidation.IsValid)
-            return BadRequest(new { Errors = pageValidation.Errors.Concat(sizeValidation.Errors) });
+        [HttpGet]
+        public async Task<IActionResult> GetAllEmployees([FromQuery] string? name, int page = 1, int pageSize = 50)
+        {
+            _logger.LogInformation("GetAllEmployees called");
 
-        var result = await _employeeQueryService.GetAllEmployeesPagedAsync(name, page, pageSize);
-        return Ok(result);
-    }
+            var pageValidation = _requestValidator.ValidateNumber(page, nameof(page));
+            var sizeValidation = _requestValidator.ValidatePageSize(pageSize, nameof(pageSize));
 
-    // GET: api/employees/{employeeNumber}
-    [HttpGet("{employeeNumber:int}")]
-    public async Task<IActionResult> GetEmployeeByNumber(int employeeNumber)
-    {
-        var validation = _requestValidator.ValidateNumber(employeeNumber, nameof(employeeNumber));
-        if (!validation.IsValid)
-            return BadRequest(new { Errors = validation.Errors });
+            if (!pageValidation.IsValid || !sizeValidation.IsValid)
+            {
+                _logger.LogWarning("Invalid pagination parameters");
+                return BadRequest(new { Errors = pageValidation.Errors.Concat(sizeValidation.Errors) });
+            }
 
-        var result = await _employeeQueryService.GetByEmployeeNumberAsync(employeeNumber);
-        return result is null ? NotFound() : Ok(result);
-    }
+            var result = await _employeeQueryService.GetAllEmployeesPagedAsync(name, page, pageSize);
+            return Ok(result);
+        }
 
-    // POST: api/employees
-    [HttpPost]
-    public async Task<IActionResult> CreateEmployee([FromBody] EmployeeDto dto)
-    {
-        var validation = _requestValidator.Validate(dto);
-        if (!validation.IsValid)
-            return BadRequest(new { Errors = validation.Errors });
+        [HttpGet("{employeeNumber:int}")]
+        public async Task<IActionResult> GetEmployeeByNumber(int employeeNumber)
+        {
+            _logger.LogInformation($"GetEmployeeByNumber called with ID: {employeeNumber}");
 
-        await _employeeService.AddAsync(dto);
-        return CreatedAtAction(nameof(GetEmployeeByNumber), new { employeeNumber = dto.EmployeeNumber }, dto);
-    }
+            var validation = _requestValidator.ValidateNumber(employeeNumber, nameof(employeeNumber));
+            if (!validation.IsValid)
+            {
+                _logger.LogWarning("Invalid employee number");
+                return BadRequest(new { Errors = validation.Errors });
+            }
 
-    // PUT: api/employees/{employeeNumber}
-    [HttpPut("{employeeNumber:int}")]
-    public async Task<IActionResult> UpdateEmployee(int employeeNumber, [FromBody] EmployeeDto dto)
-    {
-        if (employeeNumber != dto.EmployeeNumber)
-            return BadRequest(new { Message = "Mismatched employee number." });
+            var result = await _employeeQueryService.GetByEmployeeNumberAsync(employeeNumber);
+            return result is null ? NotFound() : Ok(result);
+        }
 
-        var validation = _requestValidator.Validate(dto);
-        if (!validation.IsValid)
-            return BadRequest(new { Errors = validation.Errors });
+        [HttpPost]
+        public async Task<IActionResult> CreateEmployee([FromBody] EmployeeDto dto)
+        {
+            _logger.LogInformation("CreateEmployee called");
 
-        await _employeeService.UpdateAsync(dto);
-        return NoContent();
-    }
+            var validation = _requestValidator.Validate(dto);
+            if (!validation.IsValid)
+            {
+                _logger.LogWarning("Validation failed for employee creation");
+                return BadRequest(new { Errors = validation.Errors });
+            }
 
-    // DELETE: api/employees/{employeeNumber}
-    [HttpDelete("{employeeNumber:int}")]
-    public async Task<IActionResult> DeleteEmployee(int employeeNumber)
-    {
-        var validation = _requestValidator.ValidateNumber(employeeNumber, nameof(employeeNumber));
-        if (!validation.IsValid)
-            return BadRequest(new { Errors = validation.Errors });
+            await _employeeService.AddAsync(dto);
+            _logger.LogInformation("Employee created successfully");
 
-        await _employeeQueryService.DeleteEmployeeAsync(employeeNumber);
-        return NoContent();
+            return CreatedAtAction(nameof(GetEmployeeByNumber), new { employeeNumber = dto.EmployeeNumber }, dto);
+        }
+
+        [HttpPut("{employeeNumber:int}")]
+        public async Task<IActionResult> UpdateEmployee(int employeeNumber, [FromBody] EmployeeDto dto)
+        {
+            _logger.LogInformation("UpdateEmployee called");
+
+            if (employeeNumber != dto.EmployeeNumber)
+            {
+                _logger.LogWarning("Mismatched employee number");
+                return BadRequest(new { Message = "Mismatched employee number." });
+            }
+
+            var validation = _requestValidator.Validate(dto);
+            if (!validation.IsValid)
+            {
+                _logger.LogWarning("Validation failed for employee update");
+                return BadRequest(new { Errors = validation.Errors });
+            }
+
+            await _employeeService.UpdateAsync(dto);
+            _logger.LogInformation("Employee updated successfully");
+
+            return NoContent();
+        }
+
+        [HttpDelete("{employeeNumber:int}")]
+        public async Task<IActionResult> DeleteEmployee(int employeeNumber)
+        {
+            _logger.LogInformation($"DeleteEmployee called for ID: {employeeNumber}");
+
+            var validation = _requestValidator.ValidateNumber(employeeNumber, nameof(employeeNumber));
+            if (!validation.IsValid)
+            {
+                _logger.LogWarning("Invalid employee number for delete");
+                return BadRequest(new { Errors = validation.Errors });
+            }
+
+            await _employeeQueryService.DeleteEmployeeAsync(employeeNumber);
+            _logger.LogInformation("Employee deleted successfully");
+
+            return NoContent();
+        }
     }
 }

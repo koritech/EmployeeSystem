@@ -1,4 +1,5 @@
-﻿using EmployeeSystem.Services.DTOs;
+﻿using EmployeeSystem.API.Controllers;
+using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Interfaces;
 using EmployeeSystem.Services.Models;
 using EmployeeSystem.Services.Validation;
@@ -38,7 +39,7 @@ namespace EmployeeSystem.Tests.API
             // Arrange
             _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "page"))
                           .Returns(new ValidationResult());
-            _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "pageSize"))
+            _validatorMock.Setup(v => v.ValidatePageSize(It.IsAny<int>(), "pageSize"))
                           .Returns(new ValidationResult());
 
             var pagedResult = new EmployeePagedResult
@@ -74,7 +75,7 @@ namespace EmployeeSystem.Tests.API
         {
             _validatorMock.Setup(v => v.ValidateNumber(0, "page"))
                 .Returns(new ValidationResult { Errors = { "Invalid page number" } });
-            _validatorMock.Setup(v => v.ValidateNumber(It.IsAny<int>(), "pageSize"))
+            _validatorMock.Setup(v => v.ValidatePageSize(It.IsAny<int>(), "pageSize"))
                 .Returns(new ValidationResult());
 
             var result = await _controller.GetAllEmployees(null, 0);

@@ -1,8 +1,10 @@
-﻿using EmployeeSystem.Data.Models;
+﻿using EmployeeSystem.API.Controllers;
+using EmployeeSystem.Data.Models;
 using EmployeeSystem.Data.Repositories.Interfaces;
 using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Interfaces;
 using EmployeeSystem.Services.Services;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.Services
@@ -13,13 +15,15 @@ namespace EmployeeSystem.Tests.EmployeeSystem.Services.Tests.Services
         private Mock<IEmployeeRepository> _repoMock = null!;
         private Mock<IEmployeeMapper> _mapperMock = null!;
         private EmployeeQueryService _service = null!;
+        private Mock<ILogger<EmployeeQueryService>> _loggerMock = null!;
 
         [SetUp]
         public void Setup()
         {
             _repoMock = new Mock<IEmployeeRepository>();
             _mapperMock = new Mock<IEmployeeMapper>();
-            _service = new EmployeeQueryService(_repoMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<EmployeeQueryService>>();
+            _service = new EmployeeQueryService(_repoMock.Object, _mapperMock.Object, _loggerMock.Object);
         }
 
         [Test]

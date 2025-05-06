@@ -1,9 +1,8 @@
 ﻿using EmployeeSystem.Services;
 using EmployeeSystem.Services.DTOs;
-using EmployeeSystem.Services.Interfaces;
+using EmployeeSystem.Services.Services;
 using Moq;
 using Newtonsoft.Json;
-using NUnit.Framework;
 
 namespace EmployeeSystem.Tests.Services
 {
@@ -13,13 +12,15 @@ namespace EmployeeSystem.Tests.Services
         private const string Topic = "employee-updates-test";
 
         private Mock<IKafkaProducer> _producerMock = null!;
+        private Mock<Microsoft.Extensions.Logging.ILogger<KafkaEmployeeService>> _loggerMock = null!;
         private KafkaEmployeeService _service = null!;
 
         [SetUp]
         public void Setup()
         {
             _producerMock = new Mock<IKafkaProducer>();
-            _service = new KafkaEmployeeService(_producerMock.Object);
+            _loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<KafkaEmployeeService>>();
+            _service = new KafkaEmployeeService(_producerMock.Object, _loggerMock.Object);
         }
 
         [Test]
@@ -63,5 +64,9 @@ namespace EmployeeSystem.Tests.Services
                 dto.EmployeeNumber.ToString(),
                 expectedMessage), Times.Once);
         }
+    }
+
+    internal interface ILogger<T>
+    {
     }
 }
