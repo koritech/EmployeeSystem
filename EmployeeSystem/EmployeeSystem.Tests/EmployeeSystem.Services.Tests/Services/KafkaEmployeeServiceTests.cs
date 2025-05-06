@@ -1,6 +1,8 @@
-﻿using EmployeeSystem.Services;
+﻿using EmployeeSystem.Domain.Entities;
+using EmployeeSystem.Services;
 using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Services;
+using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 
@@ -13,14 +15,20 @@ namespace EmployeeSystem.Tests.Services
 
         private Mock<IKafkaProducer> _producerMock = null!;
         private Mock<Microsoft.Extensions.Logging.ILogger<KafkaEmployeeService>> _loggerMock = null!;
+        private Mock<IOptions<KafkaSettings>> _optionsMock = null!;
         private KafkaEmployeeService _service = null!;
 
         [SetUp]
         public void Setup()
         {
+            var kafkaSettings = new KafkaSettings
+            {
+                EmployeeTopic = "test-topic"
+            };
             _producerMock = new Mock<IKafkaProducer>();
             _loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<KafkaEmployeeService>>();
-            _service = new KafkaEmployeeService(_producerMock.Object, _loggerMock.Object);
+            _optionsMock.Setup(x => x.Value).Returns(kafkaSettings);
+            _service = new KafkaEmployeeService(_producerMock.Object, _loggerMock.Object, _optionsMock.Object);
         }
 
         [Test]

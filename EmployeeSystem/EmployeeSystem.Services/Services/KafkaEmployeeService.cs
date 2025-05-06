@@ -1,9 +1,9 @@
-﻿using EmployeeSystem.Data.Repositories.Interfaces;
-using EmployeeSystem.Domain.Entities;
+﻿using EmployeeSystem.Domain.Entities;
 using EmployeeSystem.Services.DTOs;
 using EmployeeSystem.Services.Interfaces;
-using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace EmployeeSystem.Services
 {
@@ -11,19 +11,20 @@ namespace EmployeeSystem.Services
     {
         private readonly IKafkaProducer _producer;
         private readonly ILogger<KafkaEmployeeService> _logger;
-        private readonly string _topic = "employee-updates-test";
+        private readonly KafkaSettings _kafkaSettings ;
 
-        public KafkaEmployeeService(IKafkaProducer producer, ILogger<KafkaEmployeeService> logger)
+        public KafkaEmployeeService(IKafkaProducer producer, ILogger<KafkaEmployeeService> logger, IOptions<KafkaSettings> kafkaSettings)
         {
             _producer = producer;
             _logger = logger;
+            _kafkaSettings = kafkaSettings.Value;
         }
 
         public async Task AddAsync(EmployeeDto dto)
         {
             _logger.LogInformation("Sending new employee to Kafka");
             var message = JsonConvert.SerializeObject(dto);
-            await _producer.SendMessageAsync(_topic, dto.EmployeeNumber.ToString(), message);
+            await _producer.SendMessageAsync(_kafkaSettings.EmployeeTopic, dto.EmployeeNumber.ToString(), message);
             _logger.LogInformation("New employee sent to Kafka");
         }
 
@@ -31,7 +32,7 @@ namespace EmployeeSystem.Services
         {
             _logger.LogInformation("Sending updated employee to Kafka");
             var message = JsonConvert.SerializeObject(dto);
-            await _producer.SendMessageAsync(_topic, dto.EmployeeNumber.ToString(), message);
+            await _producer.SendMessageAsync(_kafkaSettings.EmployeeTopic, dto.EmployeeNumber.ToString(), message);
             _logger.LogInformation("Updated employee sent to Kafka");
         }
     }
